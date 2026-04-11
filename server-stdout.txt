@@ -1,0 +1,7 @@
+
+> server@1.0.0 dev
+> tsx watch src/index.ts
+
+[Server] GuideHub backend running on http://localhost:3001
+[Server] Environment: development
+[Server] Database: configured

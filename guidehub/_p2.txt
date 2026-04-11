@@ -1,0 +1,61 @@
+
+/* ---------- Slash Menu ---------- */
+
+const SLASH_COMMANDS = [
+  { label: 'Heading 1', icon: Heading1, action: 'h1', keywords: 'title section large' },
+  { label: 'Heading 2', icon: Heading2, action: 'h2', keywords: 'subtitle section' },
+  { label: 'Heading 3', icon: Heading3, action: 'h3', keywords: 'subheading tiny' },
+  { label: 'Bullet List', icon: List, action: 'ul', keywords: 'list points unordered' },
+  { label: 'Numbered List', icon: ListOrdered, action: 'ol', keywords: 'list ordered numbers' },
+  { label: 'Task List', icon: CheckSquare, action: 'task', keywords: 'todo checklist' },
+  { label: 'Quote', icon: Quote, action: 'quote', keywords: 'citation callout' },
+  { label: 'Code Block', icon: Code, action: 'code', keywords: 'snippet monospace' },
+  { label: 'Image', icon: ImageIcon, action: 'image', keywords: 'photo media upload' },
+  { label: 'Video', icon: Video, action: 'video', keywords: 'youtube vimeo embed media' },
+  { label: 'Paid Snippet', icon: Lock, action: 'paid', keywords: 'locked premium hidden paywall' },
+  { label: 'Divider', icon: MoreHorizontal, action: 'hr', keywords: 'separator line' },
+  { label: 'Callout', icon: Quote, action: 'callout', keywords: 'note alert warning info box' },
+]
+
+function SlashMenu({ visible, x, y, query, onSelect, activeIndex, onIndexChange }: {
+  visible: boolean
+  x: number
+  y: number
+  query: string
+  onSelect: (action: string) => void
+  activeIndex: number
+  onIndexChange: (idx: number) => void
+}) {
+  if (!visible) return null
+  const normalizedQuery = query.trim().toLowerCase()
+  const commands = normalizedQuery
+    ? SLASH_COMMANDS.filter((cmd) =>
+      ` `.toLowerCase().includes(normalizedQuery),
+    )
+    : SLASH_COMMANDS
+  return (
+    "div
+      className="fixed z-50 w-64 rounded-xl border border-neutral-200 bg-white p-1.5 shadow-xl"
+      style={{ left: Math.min(x, typeof window !== 'undefined' ? window.innerWidth - 280 : 600), top: y + 8 }}
+    ">
+      "div className="mb-1 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+        Commands {normalizedQuery ? `: ` : ''}
+      "/div>
+      "div className="max-h-72 space-y-0.5 overflow-y-auto">
+        {commands.length ? commands.map((cmd, idx) => (
+          "button
+            key={cmd.label}
+            onClick={() => onSelect(cmd.action as any)}
+            onMouseEnter={() => onIndexChange(idx)}
+            className=`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors `}
+          ">
+            "cmd.icon className="h-4 w-4 text-neutral-400" />"
+            {cmd.label}
+          "/button>
+        )) : (
+          "div className="px-3 py-2 text-xs text-neutral-400">"No matching command"/div>
+        )}
+      "/div>
+    "/div>
+  )
+}

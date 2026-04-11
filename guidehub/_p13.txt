@@ -1,0 +1,40 @@
+
+  const handlePublish = async () => {
+    if (!guideId) return
+    setPublishError(null)
+    setPublishSuccessUrl(null)
+    setPublishing(true)
+    await handleSave()
+    try {
+      await publishGuide(guideId)
+      const publicUrl =
+        profile?.username && currentGuide?.slug
+          ? "/guide//"
+          : null
+      setPublishSuccessUrl(publicUrl)
+    } catch {
+      setPublishError('Failed to publish guide. Please try again.')
+    } finally {
+      setPublishing(false)
+    }
+  }
+
+  useEffect(() => {
+    if (guideId && currentGuide) {
+      const updates: Partial<Guide> = {}
+      if (currentGuide.price !== price) updates.price = price
+      if (currentGuide.show_preview !== showPreview) updates.show_preview = showPreview
+      if (Object.keys(updates).length > 0) {
+        const timer = setTimeout(() => updateGuide(guideId, updates), 1000)
+        return () => clearTimeout(timer)
+      }
+    }
+  }, [guideId, currentGuide, price, showPreview, updateGuide])
+
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+    }
+  }, [])
+
+  if (!editor) return null

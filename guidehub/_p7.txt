@@ -1,0 +1,66 @@
+
+  const editor = useEditor({
+    extensions: TIPTAP_EXTENSIONS,
+    content: DEFAULT_CONTENT,
+    editorProps: {
+      attributes: {
+        class: 'min-h-[400px] focus:outline-none prose prose-neutral max-w-none prose-h1:text-3xl prose-h1:font-bold prose-h1:text-neutral-900 prose-h2:text-2xl prose-h2:font-semibold prose-h2:text-neutral-900 prose-h3:text-lg prose-h3:font-semibold prose-h3:text-neutral-900 prose-p:text-base prose-p:leading-relaxed prose-p:text-neutral-700 prose-blockquote:border-l-4 prose-blockquote:border-brand-300 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-neutral-500 prose-pre:bg-neutral-100 prose-pre:rounded-lg prose-pre:text-sm prose-img:rounded-xl prose-img:shadow-sm prose-hr:border-neutral-200',
+      },
+    },
+    onUpdate: () => {
+      if (isHydratingRef.current) return
+      setSaveStatus('unsaved')
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+      saveTimerRef.current = setTimeout(() => {
+        handleSave()
+      }, 3000)
+    },
+  })
+
+  useEffect(() => {
+    if (guideId && guideId !== 'new') {
+      fetchGuide(guideId)
+    }
+  }, [guideId, fetchGuide])
+
+  useEffect(() => {
+    if (!currentGuide) return
+    setTitle(currentGuide.title)
+    setPrice(currentGuide.price || 490)
+    setShowPreview(currentGuide.show_preview || false)
+  }, [currentGuide?.id])
+
+  useEffect(() => {
+    lastHydratedSignatureRef.current = ''
+    lastSavedHtmlRef.current = ''
+  }, [guideId])
+
+  useEffect(() => {
+    if (!editor || !sections.length) return
+    const signature = JSON.stringify(
+      sections.map((section) => ({
+        id: section.id,
+        updated_at: section.updated_at,
+        order: section.order,
+        title: section.title,
+        content: section.content,
+      })),
+    )
+    if (signature === lastHydratedSignatureRef.current) return
+    const content = buildEditorContentFromSections(sections, DEFAULT_CONTENT)
+    const currentHtml = editor.getHTML().trim()
+    const nextHtml = content.trim()
+    lastHydratedSignatureRef.current = signature
+    if (currentHtml === nextHtml) {
+      lastSavedHtmlRef.current = currentHtml
+      return
+    }
+    isHydratingRef.current = true
+    try {
+      editor.commands.setContent(content || DEFAULT_CONTENT, { emitUpdate: false })
+      lastSavedHtmlRef.current = editor.getHTML().trim()
+      setSaveStatus('saved')
+    } finally {
+      isHydratingRef.current = false
+    }
+  }, [editor, sections])

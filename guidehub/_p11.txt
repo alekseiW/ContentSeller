@@ -1,0 +1,52 @@
+
+  const headings = useMemo(() => {
+    const items: { text: string; level: number }[] = []
+    if (!editor) return items
+    editor.state.doc.descendants((node) => {
+      if (node.type.name === 'heading') {
+        items.push({ text: node.textContent, level: node.attrs.level })
+      }
+    })
+    return items
+  }, [editor?.state?.doc?.toJSON()])
+
+  const handleSlashCommand = useCallback(
+    (action: string) => {
+      if (!editor) return
+      setShowSlash(false)
+      setShowBlockInsert(false)
+      setSlashQuery('')
+      setSlashActiveIdx(0)
+      const { from } = editor.state.selection
+      const textBefore = editor.state.selection..parent.textBetween(0, editor.state.selection..parentOffset)
+      const match = textBefore.match(/\/(\w*)$/)
+      if (match?.[0]) {
+        const start = from - match[0].length
+        editor.chain().focus().deleteRange({ from: start, to: from }).run()
+      }
+      switch (action) {
+        case 'h1': editor.chain().focus().toggleHeading({ level: 1 }).run(); break
+        case 'h2': editor.chain().focus().toggleHeading({ level: 2 }).run(); break
+        case 'h3': editor.chain().focus().toggleHeading({ level: 3 }).run(); break
+        case 'ul': editor.chain().focus().toggleBulletList().run(); break
+        case 'ol': editor.chain().focus().toggleOrderedList().run(); break
+        case 'task': editor.chain().focus().toggleTaskList().run(); break
+        case 'quote': editor.chain().focus().toggleBlockquote().run(); break
+        case 'code': editor.chain().focus().toggleCodeBlock().run(); break
+        case 'image': {
+          const url = prompt('Image URL (leave empty to upload):')
+          if (url?.trim()) { insertImageByUrl(url) } else { openImagePicker() }
+          break
+        }
+        case 'video': {
+          const url = prompt('Video URL (YouTube/Vimeo):')
+          if (url?.trim()) { insertVideoByUrl(url) }
+          break
+        }
+        case 'paid': editor.chain().focus().toggleMark('paidText').run(); break
+        case 'hr': editor.chain().focus().setHorizontalRule().run(); break
+        case 'callout': editor.chain().focus().toggleCallout('info').run(); break
+      }
+    },
+    [editor, insertImageByUrl, insertVideoByUrl, openImagePicker]
+  )

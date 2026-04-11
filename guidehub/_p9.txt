@@ -1,0 +1,30 @@
+
+  const runAiEdit = useCallback(async (mode: string, fallbackInstruction: string) => {
+    if (!editor) return
+    const { from, to } = editor.state.selection
+    if (from === to) {
+      setAiError('Select text first to apply AI editing.')
+      return
+    }
+    const selectedText = editor.state.doc.textBetween(from, to, ' ').trim()
+    if (!selectedText) {
+      setAiError('Selected range is empty.')
+      return
+    }
+    setAiWorking(true)
+    setAiError(null)
+    setAiInfo(null)
+    try {
+      const instruction = aiPrompt.trim() || fallbackInstruction
+      const result = await aiApi.editSelection(selectedText, mode, instruction)
+      if (!result.editedText.trim()) {
+        throw new Error('AI returned empty text')
+      }
+      editor.chain().focus().deleteRange({ from, to }).insertContent(result.editedText).run()
+      setAiInfo(result.mock ? 'Applied AI draft (mock mode).' : 'AI changes applied.')
+    } catch (err: any) {
+      setAiError(err?.message ?? 'Failed to apply AI edit.')
+    } finally {
+      setAiWorking(false)
+    }
+  }, [editor, aiPrompt])

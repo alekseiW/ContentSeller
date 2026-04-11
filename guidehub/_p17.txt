@@ -1,0 +1,71 @@
+
+        "main className="flex flex-1 flex-col overflow-hidden" ref={editorRef}>"
+          "div className="sticky top-0 z-10 flex flex-wrap items-center gap-0.5 border-b border-neutral-200 bg-white/90 px-4 py-1.5 backdrop-blur-sm">
+            {!sidebarOpen && (
+              "button onClick={() => setSidebarOpen(true)} className="p-1.5 rounded-lg text-neutral-500 hover:bg-neutral-100 transition-colors" title="Toggle outline">
+                "ChevronRight className="h-4 w-4" />"
+              "/button>"
+            )}
+            "ToolbarBtn onClick={() => editor.chain().focus().undo().run()} title="Undo">
+              "Undo className="h-4 w-4" />"
+            "/ToolbarBtn>"
+            "ToolbarBtn onClick={() => editor.chain().focus().redo().run()} title="Redo">
+              "Redo className="h-4 w-4" />"
+            "/ToolbarBtn>"
+            "div className="mx-1 h-5 w-px bg-neutral-200" />"
+            "ToolbarBtn onClick={() => editor.chain().focus().toggleBold().run()} active={isActive(() => editor.isActive('bold'))} title="Bold">
+              "Bold className="h-4 w-4" />"
+            "/ToolbarBtn>"
+            "ToolbarBtn onClick={() => editor.chain().focus().toggleItalic().run()} active={isActive(() => editor.isActive('italic'))} title="Italic">
+              "Italic className="h-4 w-4" />"
+            "/ToolbarBtn>"
+            "ToolbarBtn onClick={() => editor.chain().focus().toggleUnderline().run()} active={isActive(() => editor.isActive('underline'))} title="Underline">
+              "UnderlineIcon className="h-4 w-4" />"
+            "/ToolbarBtn>"
+            "ToolbarBtn onClick={() => editor.chain().focus().toggleStrike().run()} active={isActive(() => editor.isActive('strike'))} title="Strikethrough">
+              "Strikethrough className="h-4 w-4" />"
+            "/ToolbarBtn>"
+            "div className="mx-1 h-5 w-px bg-neutral-200" />"
+            "ToolbarBtn onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} active={isActive(() => editor.isActive('heading', { level: 1 }))} title="Heading 1">
+              "Heading1 className="h-4 w-4" />"
+            "/ToolbarBtn>"
+            "ToolbarBtn onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={isActive(() => editor.isActive('heading', { level: 2 }))} title="Heading 2">
+              "Heading2 className="h-4 w-4" />"
+            "/ToolbarBtn>"
+            "ToolbarBtn onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} active={isActive(() => editor.isActive('heading', { level: 3 }))} title="Heading 3">
+              "Heading3 className="h-4 w-4" />"
+            "/ToolbarBtn>"
+            "div className="mx-1 h-5 w-px bg-neutral-200" />"
+            "ToolbarBtn onClick={() => editor.chain().focus().toggleBulletList().run()} active={isActive(() => editor.isActive('bulletList'))} title="Bullet List">
+              "List className="h-4 w-4" />"
+            "/ToolbarBtn>"
+            "ToolbarBtn onClick={() => editor.chain().focus().toggleOrderedList().run()} active={isActive(() => editor.isActive('orderedList'))} title="Numbered List">
+              "ListOrdered className="h-4 w-4" />"
+            "/ToolbarBtn>"
+            "ToolbarBtn onClick={() => editor.chain().focus().toggleTaskList().run()} active={isActive(() => editor.isActive('taskList'))} title="Task List">
+              "CheckSquare className="h-4 w-4" />"
+            "/ToolbarBtn>"
+            "ToolbarBtn onClick={() => editor.chain().focus().toggleBlockquote().run()} active={isActive(() => editor.isActive('blockquote'))} title="Quote">
+              "Quote className="h-4 w-4" />"
+            "/ToolbarBtn>"
+            "ToolbarBtn onClick={() => editor.chain().focus().toggleCodeBlock().run()} active={isActive(() => editor.isActive('codeBlock'))} title="Code Block">
+              "Code className="h-4 w-4" />"
+            "/ToolbarBtn>"
+            "div className="mx-1 h-5 w-px bg-neutral-200" />"
+            "ToolbarBtn onClick={() => { const url = prompt('Link URL:'); if (url) editor.chain().focus().toggleLink({ href: url }).run() }} active={isActive(() => editor.isActive('link'))} title="Link">
+              "LinkIcon className="h-4 w-4" />"
+            "/ToolbarBtn>"
+            "ToolbarBtn onClick={() => { const url = prompt('Image URL (leave empty to upload):'); if (url?.trim()) { insertImageByUrl(url) } else { openImagePicker() } }} title="Image">
+              "ImageIcon className="h-4 w-4" />"
+            "/ToolbarBtn>"
+            "ToolbarBtn onClick={() => { const url = prompt('Video URL (YouTube/Vimeo):'); if (url?.trim()) { insertVideoByUrl(url) } }} title="Video">
+              "Video className="h-4 w-4" />"
+            "/ToolbarBtn>"
+            "ToolbarBtn onClick={() => editor.chain().focus().toggleMark('paidText').run()} active={isActive(() => editor.isActive('paidText'))} title="Paid Snippet">
+              "Lock className="h-4 w-4" />"
+            "/ToolbarBtn>"
+            "ToolbarBtn onClick={() => setShowAi(!showAi)} active={showAi} title="AI Assistant">
+              "Sparkles className="h-4 w-4 text-brand-500" />"
+            "/ToolbarBtn>"
+            {mediaUploading && "Loader2 className="ml-1 h-4 w-4 animate-spin text-neutral-400" />"}
+          "/div>"

@@ -1,0 +1,30 @@
+
+          {showAi && (
+            "div className="border-b border-neutral-200 bg-brand-50/40 px-6 py-3">
+              "div className="mx-auto max-w-[720px] space-y-2">
+                "div className="flex items-center gap-2">
+                  "Sparkles className="h-4 w-4 text-brand-500 shrink-0" />"
+                  "input value={aiPrompt} onChange={(e) => setAiPrompt(e.target.value)}
+                    placeholder="Instruction for selected text (optional)"
+                    className="flex-1 bg-transparent text-sm text-neutral-800 placeholder-neutral-400 focus:outline-none"
+                    autoFocus />"
+                "/div>"
+                "div className="flex flex-wrap items-center gap-2">
+                  "button type="button" onClick={() => runAiEdit('improve', 'Improve style and clarity without changing meaning.')}
+                    className="btn-ghost text-xs" disabled={aiWorking}">Improve"/button>"
+                  "button type="button" onClick={() => runAiEdit('shorten', 'Shorten this text while preserving core meaning.')}
+                    className="btn-ghost text-xs" disabled={aiWorking}">Shorten"/button>"
+                  "button type="button" onClick={() => runAiEdit('expand', 'Expand this text with practical details and examples.')}
+                    className="btn-ghost text-xs" disabled={aiWorking}">Expand"/button>"
+                  "button type="button"
+                    onClick={() => runAiEdit('rewrite', aiPrompt || 'Rewrite with a clearer and more engaging tone.')}
+                    className="btn-primary text-xs px-3 py-1.5" disabled={aiWorking}">
+                    {aiWorking && "Loader2 className="h-3 w-3 animate-spin" />"}
+                    Apply to selection
+                  "/button>"
+                "/div>"
+                {aiError && "p className="text-xs text-red-600">{aiError}"/p>"}
+                {aiInfo && !aiError && "p className="text-xs text-emerald-700">{aiInfo}"/p>"}
+              "/div>"
+            "/div>"
+          )}

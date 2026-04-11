@@ -1,0 +1,60 @@
+﻿services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: guidehub-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: guidehub
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d guidehub"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - guidehub-network
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: guidehub-server
+    env_file:
+      - ./server/.env
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - guidehub-network
+
+  guidehub:
+    build:
+      context: ./guidehub
+      dockerfile: Dockerfile
+    container_name: guidehub-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./guidehub:/app
+      - /app/node_modules
+    depends_on:
+      - server
+    networks:
+      - guidehub-network
+
+volumes:
+  postgres_data:
+
+networks:
+  guidehub-network:
+    driver: bridge

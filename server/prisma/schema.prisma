@@ -1,0 +1,153 @@
+// GuideHub Prisma Schema
+// Target: PostgreSQL (local or any provider)
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Users / Profiles ──────────────────────────────────────────────────────
+
+model Profile {
+  id              String   @id @default(uuid())
+  email           String   @unique
+  passwordHash    String   @map("password_hash")
+  fullName        String   @default("") @map("full_name")
+  username        String   @unique
+  avatarUrl       String?  @map("avatar_url")
+  bio             String?
+  socialLinks     Json     @default("{}") @map("social_links")
+  isSelfEmployed  Boolean  @default(false) @map("is_self_employed")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  guides          Guide[]
+  orders          Order[]
+  purchases       Purchase[]
+  analyticsEvents AnalyticsEvent[]
+
+  @@map("profiles")
+}
+
+// ─── Guides ────────────────────────────────────────────────────────────────
+
+model Guide {
+  id                String   @id @default(uuid())
+  authorId          String   @map("author_id")
+  title             String
+  description       String   @default("")
+  slug              String
+  coverImage        String?  @map("cover_image")
+  accentColor       String   @default("#6366f1") @map("accent_color")
+  template          String   @default("minimal")
+  price             Decimal  @default(0) @db.Decimal(10, 2)
+  showPreview       Boolean  @default(true) @map("show_preview")
+  previewSections   String[] @default([]) @map("preview_sections")
+  isCourse          Boolean  @default(false) @map("is_course")
+  status            String   @default("draft")
+  views             Int      @default(0)
+  sales             Int      @default(0)
+  revenue           Decimal  @default(0) @db.Decimal(10, 2)
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  publishedAt       DateTime? @map("published_at")
+
+  author            Profile  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  sections          GuideSection[]
+  orders            Order[]
+  analyticsEvents   AnalyticsEvent[]
+  purchases         Purchase[]
+
+  @@unique([authorId, slug])
+  @@index([authorId])
+  @@index([status])
+  @@index([slug])
+  @@map("guides")
+}
+
+// ─── Guide Sections ────────────────────────────────────────────────────────
+
+model GuideSection {
+  id                  String   @id @default(uuid())
+  guideId             String   @map("guide_id")
+  title               String   @default("")
+  content             Json     @default("{}")
+  sectionOrder        Int      @default(0) @map("section_order")
+  hiddenUntilPayment  Boolean  @default(false) @map("hidden_until_payment")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  guide               Guide    @relation(fields: [guideId], references: [id], onDelete: Cascade)
+
+  @@index([guideId])
+  @@map("guide_sections")
+}
+
+// ─── Orders ────────────────────────────────────────────────────────────────
+
+model Order {
+  id              String   @id @default(uuid())
+  guideId         String   @map("guide_id")
+  buyerId         String?  @map("buyer_id")
+  buyerEmail      String   @map("buyer_email")
+  buyerName       String?  @default("") @map("buyer_name")
+  amount          Decimal  @db.Decimal(10, 2)
+  currency        String   @default("RUB")
+  status          String   @default("pending")
+  paymentMethod   String   @default("card") @map("payment_method")
+  paymentId       String?  @map("payment_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  guide           Guide    @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  buyer           Profile? @relation(fields: [buyerId], references: [id])
+  purchase        Purchase?
+
+  @@index([guideId])
+  @@index([status])
+  @@index([buyerEmail])
+  @@map("orders")
+}
+
+// ─── Purchases (access grants) ─────────────────────────────────────────────
+
+model Purchase {
+  id              String   @id @default(uuid())
+  orderId         String   @unique @map("order_id")
+  userId          String   @map("user_id")
+  guideId         String   @map("guide_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  order           Order    @relation(fields: [orderId], references: [id])
+  user            Profile  @relation(fields: [userId], references: [id])
+  guide           Guide    @relation(fields: [guideId], references: [id])
+
+  @@index([userId])
+  @@index([guideId])
+  @@map("purchases")
+}
+
+// ─── Analytics Events ──────────────────────────────────────────────────────
+
+model AnalyticsEvent {
+  id              String   @id @default(uuid())
+  guideId         String   @map("guide_id")
+  userId          String?  @map("user_id")
+  eventType       String   @map("event_type")
+  metadata        Json     @default("{}")
+  ip              String?
+  userAgent       String?  @map("user_agent")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  guide           Guide    @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  user            Profile? @relation(fields: [userId], references: [id])
+
+  @@index([guideId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@map("analytics_events")
+}

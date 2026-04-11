@@ -1,0 +1,51 @@
+
+  useEffect(() => {
+    if (!editor) return
+    const { state } = editor
+    const {  } = state.selection
+    const textBefore = .parent.textBetween(0, .parentOffset)
+    const match = textBefore.match(/\/(\w*)$/)
+    if (match) {
+      const coords = editor.view.coordsAtPos(.pos)
+      setSlashPos({ x: coords.left, y: coords.bottom })
+      setSlashQuery(match[1] ?? '')
+      setSlashActiveIdx(0)
+      setShowSlash(true)
+    } else {
+      setShowSlash(false)
+      setSlashQuery('')
+      setSlashActiveIdx(0)
+    }
+  }, [editor?.state?.selection?.from])
+
+  useEffect(() => {
+    if (!showSlash) return
+    const normalizedQuery = slashQuery.trim().toLowerCase()
+    const filtered = normalizedQuery
+      ? SLASH_COMMANDS.filter((cmd) =>
+        ` `.toLowerCase().includes(normalizedQuery),
+      )
+      : SLASH_COMMANDS
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        setSlashActiveIdx((prev) => (prev + 1) % filtered.length)
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        setSlashActiveIdx((prev) => (prev - 1 + filtered.length) % filtered.length)
+      } else if (e.key === 'Enter') {
+        e.preventDefault()
+        if (filtered[slashActiveIdx]) {
+          handleSlashCommand(filtered[slashActiveIdx].action)
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault()
+        setShowSlash(false)
+        setShowBlockInsert(false)
+        setSlashQuery('')
+        setSlashActiveIdx(0)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [showSlash, slashQuery, slashActiveIdx])

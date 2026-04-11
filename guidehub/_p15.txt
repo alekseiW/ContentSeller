@@ -1,0 +1,25 @@
+
+      {publishError && (
+        "div className="border-b border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+          {publishError}
+        "/div>"
+      )}
+
+      {publishSuccessUrl && (
+        "div className="border-b border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
+          "div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
+            "div className="flex items-center gap-2">
+              "CheckCircle2 className="h-4 w-4" />"
+              "span>"Guide published successfully."/span>"
+            "/div>"
+            "div className="flex items-center gap-2">
+              "Link to={publishSuccessUrl} target="_blank" rel="noreferrer" className="btn-ghost text-xs">
+                "ExternalLink className="h-3.5 w-3.5" />" Open public page
+              "/Link>"
+              "button onClick={() => navigate('/dashboard')} className="btn-primary text-xs px-3 py-1.5">
+                Go to dashboard
+              "/button>"
+            "/div>"
+          "/div>"
+        "/div>"
+      )}

@@ -1,0 +1,79 @@
+import { useState, useCallback, useRef, useMemo, useEffect, type ChangeEvent } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import Image from '@tiptap/extension-image'
+import LinkExtension from '@tiptap/extension-link'
+import Underline from '@tiptap/extension-underline'
+import Youtube from '@tiptap/extension-youtube'
+import TaskList from '@tiptap/extension-task-list'
+import TaskItem from '@tiptap/extension-task-item'
+import Placeholder from '@tiptap/extension-placeholder'
+import {
+  ArrowLeft,
+  Bold,
+  Italic,
+  Underline as UnderlineIcon,
+  Strikethrough,
+  List,
+  ListOrdered,
+  Quote,
+  Code,
+  ImageIcon,
+  Link as LinkIcon,
+  Video,
+  Lock,
+  Eye,
+  Save,
+  Heading1,
+  Heading2,
+  Heading3,
+  CheckSquare,
+  Undo,
+  Redo,
+  Sparkles,
+  ChevronRight,
+  ChevronLeft,
+  MoreHorizontal,
+  Plus,
+  Wand2,
+  Loader2,
+  CheckCircle2,
+  ExternalLink,
+} from 'lucide-react'
+import { useGuideStore } from '@/stores/guideStore'
+import { useAuthStore } from '@/stores/authStore'
+import { aiApi, sectionsApi, uploadApi } from '@/lib/api'
+import { buildEditorContentFromSections, createStoredSectionContent } from '@/lib/editorContent'
+import { PaidText } from '@/editor/extensions/paidText'
+import { Callout } from '@/editor/extensions/callout'
+import type { Guide } from '@/types'
+
+const TIPTAP_EXTENSIONS = [
+  StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
+  LinkExtension.configure({
+    openOnClick: false,
+    autolink: true,
+    protocols: ['http', 'https', 'mailto', 'tel'],
+  }),
+  Underline,
+  Image.configure({ inline: false }),
+  Youtube.configure({
+    controls: true,
+    nocookie: true,
+    width: 720,
+    height: 405,
+    allowFullscreen: true,
+  }),
+  TaskList,
+  TaskItem.configure({ nested: true }),
+  PaidText,
+  Callout,
+  Placeholder.configure({
+    placeholder: 'Start writing your guide content here...',
+  }),
+]
+
+const ACCENT_COLORS = [
+  '#4f46e5', '#059669', '#dc2626', '#d97706', '#7c3aed', '#db2777',
+]

@@ -1,0 +1,30 @@
+
+      "div className="flex flex-1 overflow-hidden">
+        {sidebarOpen && (
+          "aside className="w-56 shrink-0 border-r border-neutral-200 bg-white overflow-y-auto">
+            "div className="p-4">
+              "div className="mb-3 flex items-center justify-between">
+                "h3 className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
+                  Outline
+                "/h3>"
+                "button onClick={() => setSidebarOpen(false)} className="rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600">
+                  "ChevronLeft className="h-3.5 w-3.5" />"
+                "/button>"
+              "/div>"
+              "nav className="space-y-0.5">
+                {headings.length === 0 ? (
+                  "p className="text-xs text-neutral-400">Add headings to build outline"/p>"
+                ) : (
+                  headings.map((h, i) => (
+                    "button
+                      key={i}
+                      onClick={() => { editor.commands.focus('start') }}
+                      className=`block w-full truncate rounded-lg px-2 py-1.5 text-left text-sm text-neutral-600 transition-colors hover:bg-neutral-50 `}">
+                      {h.text || 'Untitled'}
+                    "/button>"
+                  ))
+                )}
+              "/nav>"
+            "/div>"
+          "/aside>"
+        )}

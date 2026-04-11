@@ -1,0 +1,43 @@
+
+/* ---------- Toolbar button ---------- */
+
+type ToolbarBtnProps = {
+  onClick: () => void
+  active?: boolean
+  children: React.ReactNode
+  title?: string
+}
+
+function ToolbarBtn({ onClick, active, children, title }: ToolbarBtnProps) {
+  return (
+    "button type="button" onClick={onClick} title={title}
+      className=`flex h-8 w-8 items-center justify-center rounded-lg text-sm transition-colors `}">
+      {children}
+    "/button>"
+  )
+}
+
+/* ---------- Toggle ---------- */
+
+function Toggle({ label, description, checked, onChange }: {
+  label: string
+  description: string
+  checked: boolean
+  onChange: (v: boolean) => void
+}) {
+  return (
+    "div className="flex items-center justify-between rounded-lg bg-neutral-50 px-3 py-2">
+      "div>
+        "p className="text-xs font-medium text-neutral-700">{label}"/p>
+        "p className="text-[10px] text-neutral-400">{description}"/p>
+      "/div>
+      "button type="button" role="switch" aria-checked={checked}
+        onClick={() => onChange(!checked)}
+        className=`relative h-5 w-9 shrink-0 rounded-full transition-colors `}">
+        "span className="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm"
+          style={{ transform: checked ? 'translateX(16px)' : 'translateX(0)', transition: 'transform 150ms' }}
+        "/span>"
+      "/button>"
+    "/div>"
+  )
+}

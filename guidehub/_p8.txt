@@ -1,0 +1,41 @@
+
+  const isActive = useCallback(
+    (check: () => boolean) => {
+      try { return !!check() } catch { return false }
+    },
+    []
+  )
+
+  const openImagePicker = useCallback(() => {
+    imageInputRef.current?.click()
+  }, [])
+
+  const insertImageByUrl = useCallback((url: string) => {
+    if (!editor) return
+    const normalized = url.trim()
+    if (!normalized) return
+    editor.chain().focus().setImage({ src: normalized }).run()
+  }, [editor])
+
+  const insertVideoByUrl = useCallback((url: string) => {
+    if (!editor) return
+    const normalized = url.trim()
+    if (!normalized) return
+    ;(editor.chain().focus() as any).setYoutubeVideo({ src: normalized }).run()
+  }, [editor])
+
+  const handleImageInputChange = useCallback(async (event: ChangeEvent<HTMLInputElement>) => {
+    if (!editor) return
+    const file = event.target.files?.[0]
+    if (!file) return
+    setMediaUploading(true)
+    try {
+      const uploaded = await uploadApi.upload(file)
+      editor.chain().focus().setImage({ src: uploaded.url, alt: file.name }).run()
+    } catch (err) {
+      console.error('[Editor] Image upload failed', err)
+    } finally {
+      setMediaUploading(false)
+      event.target.value = ''
+    }
+  }, [editor])

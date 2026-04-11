@@ -1,0 +1,43 @@
+
+  const handleSave = useCallback(async () => {
+    if (!guideId || !editor) return
+    const html = editor.getHTML().trim()
+    const contentPayload = createStoredSectionContent(html, editor.getJSON())
+    const metaChanged = Boolean(
+      currentGuide && (
+        currentGuide.title !== title ||
+        currentGuide.show_preview !== showPreview
+      ),
+    )
+    const contentChanged = html !== lastSavedHtmlRef.current
+    if (!metaChanged && !contentChanged) {
+      setSaveStatus('saved')
+      return
+    }
+    setSaveStatus('saving')
+    try {
+      if (metaChanged) {
+        await updateGuide(guideId, { title, show_preview: showPreview } as Partial<Guide>)
+      }
+      if (contentChanged) {
+        if (sections.length > 0) {
+          const firstSection = sections[0]
+          await sectionsApi.update(firstSection.id, {
+            title: firstSection.title || 'Content',
+            content: contentPayload,
+          })
+        } else {
+          await sectionsApi.create(guideId, {
+            title: 'Content',
+            content: contentPayload,
+            order: 0,
+            hidden_until_payment: false,
+          })
+        }
+        lastSavedHtmlRef.current = html
+      }
+      setSaveStatus('saved')
+    } catch {
+      setSaveStatus('unsaved')
+    }
+  }, [guideId, editor, title, showPreview, sections, updateGuide, currentGuide])

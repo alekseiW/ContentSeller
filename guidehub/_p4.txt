@@ -1,0 +1,51 @@
+
+/* ---------- Bubble Menu (selection) ---------- */
+
+function BubbleMenuComponent({ editor, onTogglePaid, onAiEdit }: {
+  editor: any
+  onTogglePaid: () => void
+  onAiEdit: () => void
+}) {
+  const isActive = (check: () => boolean) => {
+    try { return !!check() } catch { return false }
+  }
+  return (
+    "BubbleMenu
+      editor={editor}
+      tippyOptions={{ duration: 100, placement: 'top' }}
+      shouldShow={({ editor }) => {
+        const { state } = editor
+        const { from, to } = state.selection
+        return from !== to && !editor.isActive('image')
+      }}
+    ">
+      "div className="flex items-center gap-0.5 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
+        "button type="button" onClick={() => editor.chain().focus().toggleBold().run()}
+          className={`flex h-7 w-7 items-center justify-center rounded-md text-sm transition-colors `}">
+          "span className="font-bold text-xs">B"/span>"/button>"
+        "button type="button" onClick={() => editor.chain().focus().toggleItalic().run()}
+          className={`flex h-7 w-7 items-center justify-center rounded-md text-sm transition-colors `}">
+          "span className="italic text-xs">I"/span>"/button>"
+        "button type="button" onClick={() => editor.chain().focus().toggleUnderline().run()}
+          className={`flex h-7 w-7 items-center justify-center rounded-md text-sm transition-colors `}">
+          "span className="underline text-xs">U"/span>"/button>"
+        "button type="button" onClick={() => editor.chain().focus().toggleStrike().run()}
+          className={`flex h-7 w-7 items-center justify-center rounded-md text-sm transition-colors `}">
+          "span className="line-through text-xs">S"/span>"/button>"
+        "div className="mx-0.5 h-4 w-px bg-neutral-200" />"
+        "button type="button"
+          onClick={() => { const url = prompt('Link URL:'); if (url) editor.chain().focus().toggleLink({ href: url }).run() }}
+          className={`flex h-7 w-7 items-center justify-center rounded-md text-sm transition-colors `}">
+          "LinkIcon className="h-3.5 w-3.5" />"/button>"
+        "div className="mx-0.5 h-4 w-px bg-neutral-200" />"
+        "button type="button" onClick={onTogglePaid}
+          className={`flex h-7 w-7 items-center justify-center rounded-md text-sm transition-colors `}" title="Lock until payment"">
+          "Lock className="h-3.5 w-3.5" />"/button>"
+        "button type="button" onClick={onAiEdit}
+          className="flex h-7 w-7 items-center justify-center rounded-md text-sm text-brand-500 transition-colors hover:bg-brand-50"
+          title="AI improve"">
+          "Wand2 className="h-3.5 w-3.5" />"/button>"
+      "/div>"
+    "/BubbleMenu>"
+  )
+}

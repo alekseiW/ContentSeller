@@ -1,0 +1,25 @@
+
+      "SlashMenu
+        visible={showSlash}
+        x={slashPos.x}
+        y={slashPos.y}
+        query={slashQuery}
+        onSelect={handleSlashCommand}
+        activeIndex={slashActiveIdx}
+        onIndexChange={setSlashActiveIdx}
+      />"
+
+      "BlockInsertHandle
+        visible={showBlockInsert}
+        x={blockInsertPos.x}
+        y={blockInsertPos.y}
+        onSelect={handleSlashCommand}
+      />"
+    "/div>"
+  )
+}
+
+const DEFAULT_CONTENT = `
+<h1>Your Guide Title</h1>
+<p>Start writing your guide content here. You can use formatting, add images, and create rich documents.</p>
+`

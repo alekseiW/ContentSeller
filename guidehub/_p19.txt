@@ -1,0 +1,29 @@
+
+          "div className="flex-1 overflow-y-auto">
+            "div className="relative mx-auto max-w-[720px] px-6 py-10">
+              "button type="button"
+                onClick={(e) => {
+                  const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect()
+                  setBlockInsertPos({ x: rect.right + 8, y: rect.top })
+                  setShowBlockInsert((v) => !v)
+                }}
+                className="absolute -left-10 top-10 flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 bg-white text-neutral-500 shadow-sm transition-colors hover:bg-neutral-50 hover:text-neutral-700"
+                title="Insert block">
+                "Plus className="h-4 w-4" />"
+              "/button>"
+              "input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageInputChange} />"
+              "BubbleMenuComponent
+                editor={editor}
+                onTogglePaid={() => editor.chain().focus().toggleMark('paidText').run()}
+                onAiEdit={() => {
+                  const { from, to } = editor.state.selection
+                  if (from === to) return
+                  const selectedText = editor.state.doc.textBetween(from, to, ' ').trim()
+                  if (!selectedText) return
+                  runAiEdit('improve', 'Improve style and clarity without changing meaning.')
+                }}
+              />"
+              "EditorContent editor={editor} />"
+            "/div>"
+          "/div>"
+        "/main>"

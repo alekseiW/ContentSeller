@@ -1,0 +1,31 @@
+
+  return (
+    "div className="flex h-screen flex-col bg-[#fafafa]">
+      "header className="flex h-14 shrink-0 items-center justify-between border-b border-neutral-200 bg-white px-4">
+        "div className="flex items-center gap-2">
+          "Link to="/dashboard" className="btn-ghost h-8 w-8 p-0">
+            "ArrowLeft className="h-4 w-4" />"
+          "/Link>"
+          "input
+            value={title}
+            onChange={(e) => { setTitle(e.target.value); setSaveStatus('unsaved') }}
+            className="rounded-md border-0 bg-transparent px-2 py-1 text-sm font-semibold text-neutral-800 placeholder-neutral-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20 max-w-[220px] truncate"
+          />"
+          "span
+            className=`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium `}">
+            "Save className="mr-1 h-3 w-3" />"
+            {saveStatus === 'saved' ? 'Saved' : saveStatus === 'saving' ? 'Saving...' : 'Unsaved'}
+          "/span>"
+          {loading && "Loader2 className="h-4 w-4 animate-spin text-neutral-400" />"}
+        "/div>"
+        "div className="flex items-center gap-2">
+          "button onClick={handleSave} className="btn-ghost text-xs flex items-center gap-1">
+            "Save className="h-3.5 w-3.5" />" Save "/button>"
+          "button className="btn-ghost text-xs flex items-center gap-1">
+            "Eye className="h-3.5 w-3.5" />" Preview "/button>"
+          "button onClick={handlePublish} disabled={publishing} className="btn-primary text-xs px-4 py-1.5 flex items-center gap-1">
+            {publishing && "Loader2 className="h-3 w-3 animate-spin" />"}
+            {publishing ? 'Publishing...' : 'Publish'}
+          "/button>"
+        "/div>"
+      "/header>"

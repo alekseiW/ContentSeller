@@ -1,0 +1,45 @@
+
+/* ---------- Block Insert Handle ---------- */
+
+function BlockInsertHandle({ visible, x, y, onSelect }: {
+  visible: boolean
+  x: number
+  y: number
+  onSelect: (action: string) => void
+}) {
+  if (!visible) return null
+  const quickActions = [
+    { label: 'Heading 2', icon: Heading2, action: 'h2' },
+    { label: 'Bullet List', icon: List, action: 'ul' },
+    { label: 'Task List', icon: CheckSquare, action: 'task' },
+    { label: 'Quote', icon: Quote, action: 'quote' },
+    { label: 'Image', icon: ImageIcon, action: 'image' },
+    { label: 'Video', icon: Video, action: 'video' },
+    { label: 'Paid Snippet', icon: Lock, action: 'paid' },
+    { label: 'Code Block', icon: Code, action: 'code' },
+    { label: 'Divider', icon: MoreHorizontal, action: 'hr' },
+    { label: 'Callout', icon: Quote, action: 'callout' },
+  ]
+  return (
+    "div
+      className="fixed z-50 w-56 rounded-xl border border-neutral-200 bg-white p-1.5 shadow-xl"
+      style={{ left: Math.min(x, typeof window !== 'undefined' ? window.innerWidth - 240 : 600), top: y - 4 }}
+    ">
+      "div className="mb-1 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+        Insert block
+      "/div>
+      "div className="max-h-80 space-y-0.5 overflow-y-auto">
+        {quickActions.map((cmd) => (
+          "button
+            key={cmd.label}
+            onClick={() => onSelect(cmd.action as any)}
+            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-neutral-700 transition-colors hover:bg-neutral-100"
+          ">
+            "cmd.icon className="h-4 w-4 text-neutral-400" />"
+            {cmd.label}
+          "/button>
+        ))}
+      "/div>
+    "/div>
+  )
+}
