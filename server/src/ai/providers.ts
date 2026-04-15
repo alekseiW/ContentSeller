@@ -9,15 +9,52 @@ const openaiApiKey = process.env.OPENAI_API_KEY?.trim();
 const anthropicApiKey = process.env.ANTHROPIC_API_KEY?.trim();
 const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
 const grokApiKey = process.env.GROK_API_KEY?.trim();
-const gigachatApiKey = process.env.GIGACHAT_API_KEY?.trim();
+const gigachatCredentials = process.env.GIGACHAT_API_KEY?.trim();
 
 const openai = openaiApiKey ? new OpenAI({ apiKey: openaiApiKey }) : null;
 const anthropic = anthropicApiKey ? new Anthropic({ apiKey: anthropicApiKey }) : null;
 const gemini = geminiApiKey ? new GoogleGenerativeAI(geminiApiKey) : null;
 const groq = grokApiKey ? new Groq({ apiKey: grokApiKey }) : null;
-const gigachat = gigachatApiKey
+
+// ─── GigaChat OAuth token management ─────────────────────────────────────────
+
+let gigachatToken: string | null = null;
+let gigachatTokenExpiry = 0;
+
+async function getGigaChatToken(): Promise<string> {
+  if (!gigachatCredentials) throw new Error("GigaChat not configured");
+
+  // Reuse token if still valid (with 30s buffer)
+  if (gigachatToken && Date.now() < gigachatTokenExpiry - 30_000) {
+    return gigachatToken;
+  }
+
+  const uuid = crypto.randomUUID();
+  const res = await fetch("https://ngw.devices.sberbank.ru:443/api/v2/oauth", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Accept: "application/json",
+      Authorization: `Basic ${gigachatCredentials}`,
+      RqUID: uuid,
+    },
+    body: "scope=GIGACHAT_API_PERS",
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`GigaChat OAuth error: ${res.status} ${body}`);
+  }
+
+  const data = (await res.json()) as { access_token: string; expires_at: number };
+  gigachatToken = data.access_token;
+  gigachatTokenExpiry = data.expires_at * 1000; // convert to ms
+  return gigachatToken;
+}
+
+const gigachat = gigachatCredentials
   ? new OpenAI({
-      apiKey: gigachatApiKey,
+      apiKey: "dummy", // will be overridden per-request
       baseURL: "https://gigachat.devices.sberbank.ru/api/v1/",
     })
   : null;
@@ -78,12 +115,14 @@ async function callGroq(prompt: string, systemPrompt?: string): Promise<string> 
 
 async function callGigaChat(prompt: string, systemPrompt?: string): Promise<string> {
   if (!gigachat) throw new Error("GigaChat not configured");
+  const token = await getGigaChatToken();
   const messages: OpenAI.ChatCompletionMessageParam[] = [];
   if (systemPrompt) messages.push({ role: "system", content: systemPrompt });
   messages.push({ role: "user", content: prompt });
   const res = await gigachat.chat.completions.create({
     model: "GigaChat-Max",
     messages,
+    headers: { Authorization: `Bearer ${token}` },
   });
   return res.choices[0]?.message?.content ?? "";
 }
