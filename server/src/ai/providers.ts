@@ -9,11 +9,18 @@ const openaiApiKey = process.env.OPENAI_API_KEY?.trim();
 const anthropicApiKey = process.env.ANTHROPIC_API_KEY?.trim();
 const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
 const grokApiKey = process.env.GROK_API_KEY?.trim();
+const gigachatApiKey = process.env.GIGACHAT_API_KEY?.trim();
 
 const openai = openaiApiKey ? new OpenAI({ apiKey: openaiApiKey }) : null;
 const anthropic = anthropicApiKey ? new Anthropic({ apiKey: anthropicApiKey }) : null;
 const gemini = geminiApiKey ? new GoogleGenerativeAI(geminiApiKey) : null;
 const groq = grokApiKey ? new Groq({ apiKey: grokApiKey }) : null;
+const gigachat = gigachatApiKey
+  ? new OpenAI({
+      apiKey: gigachatApiKey,
+      baseURL: "https://gigachat.devices.sberbank.ru/api/v1/",
+    })
+  : null;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -69,16 +76,29 @@ async function callGroq(prompt: string, systemPrompt?: string): Promise<string> 
   return res.choices[0]?.message?.content ?? "";
 }
 
+async function callGigaChat(prompt: string, systemPrompt?: string): Promise<string> {
+  if (!gigachat) throw new Error("GigaChat not configured");
+  const messages: OpenAI.ChatCompletionMessageParam[] = [];
+  if (systemPrompt) messages.push({ role: "system", content: systemPrompt });
+  messages.push({ role: "user", content: prompt });
+  const res = await gigachat.chat.completions.create({
+    model: "GigaChat-Max",
+    messages,
+  });
+  return res.choices[0]?.message?.content ?? "";
+}
+
 // Provider registry: each key maps to its call function
 const providers: Record<string, ProviderFn> = {
   openai: callOpenAI,
   anthropic: callAnthropic,
   gemini: callGemini,
   groq: callGroq,
+  gigachat: callGigaChat,
 };
 
 // Ordered fallback chain
-const providerOrder = ["openai", "anthropic", "gemini", "groq"];
+const providerOrder = ["openai", "anthropic", "gemini", "groq", "gigachat"];
 
 // ─── Core: generateText with fallback ────────────────────────────────────────
 
