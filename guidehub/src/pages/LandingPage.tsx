@@ -1,197 +1,234 @@
 import { Link } from 'react-router-dom'
-import {
-  ArrowRight,
-  BookOpen,
-  CheckCircle2,
-  CreditCard,
-  FileText,
-  Share2,
-  Sparkles,
-  TrendingUp,
-  Users,
-} from 'lucide-react'
+import { ArrowRight, BookOpen, CheckCircle2, Dumbbell, FileText, Map, Sparkles } from 'lucide-react'
+
+const showcaseCards = [
+  {
+    title: 'Weekend in Istanbul',
+    label: 'Journey Guide',
+    meta: 'Travel creator',
+    note: 'Routes, food stops, maps, logistics.',
+    accent: '#1F7A8C',
+    soft: '#E4F3F5',
+  },
+  {
+    title: 'Hybrid Strength Cycle',
+    label: 'Protocol Program',
+    meta: 'Fitness coach',
+    note: 'Phases, weekly sessions, progression.',
+    accent: '#6A8A24',
+    soft: '#F1F5DF',
+  },
+  {
+    title: 'Launch Playbook',
+    label: 'Tactical Playbook',
+    meta: 'Creator strategist',
+    note: 'Frameworks, templates, launch checklists.',
+    accent: '#3458D8',
+    soft: '#E7ECFF',
+  },
+]
+
+const formatCards = [
+  {
+    icon: Map,
+    title: 'Journey-led products',
+    description: 'Travel guides, relocation packs, destination handbooks, and route-based content.',
+  },
+  {
+    icon: Dumbbell,
+    title: 'Protocol-led products',
+    description: 'Training programs, nutrition systems, performance plans, and structured progression.',
+  },
+  {
+    icon: FileText,
+    title: 'Playbook-led products',
+    description: 'Creator systems, operational manuals, checklists, and expert frameworks.',
+  },
+]
 
 export function LandingPage() {
   return (
-    <div className="min-h-screen bg-neutral-50 text-neutral-900">
-      <header className="sticky top-0 z-40 border-b border-neutral-200/80 bg-white/80 backdrop-blur-md">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-4">
-          <Link to="/" className="flex items-center gap-2">
-            <BookOpen className="h-6 w-6 text-brand-600" />
-            <span className="text-xl font-bold">GuideHub</span>
+    <div className="min-h-screen" style={{ background: 'var(--gh-bg)', color: 'var(--gh-text)' }}>
+      <header
+        className="sticky top-0 z-30 border-b"
+        style={{ borderColor: 'var(--gh-line)', background: 'rgba(251, 248, 243, 0.9)', backdropFilter: 'blur(12px)' }}
+      >
+        <div className="mx-auto flex w-full max-w-[1280px] items-center justify-between px-6 py-4 lg:px-8">
+          <Link to="/" className="flex items-center gap-3">
+            <span className="gh-brand-mark">
+              <BookOpen className="h-5 w-5" />
+            </span>
+            <div>
+              <p className="gh-kicker">Studio Catalog</p>
+              <p className="text-lg font-semibold" style={{ color: 'var(--gh-ink)' }}>GuideHub</p>
+            </div>
           </Link>
-          <nav className="flex items-center gap-3">
-            <Link to="/login" className="rounded-lg px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-100">
-              Log in
-            </Link>
-            <Link
-              to="/register"
-              className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-700"
-            >
-              Get started
+
+          <nav className="hidden items-center gap-3 sm:flex">
+            <Link to="/catalog" className="btn-ghost">Catalog</Link>
+            <Link to="/login" className="btn-ghost">Log in</Link>
+            <Link to="/register" className="btn-primary">
+              Start publishing
             </Link>
           </nav>
         </div>
       </header>
 
-      <section className="relative overflow-hidden border-b border-neutral-200 bg-white">
-        <div className="absolute -left-24 top-[-100px] h-80 w-80 rounded-full bg-brand-200/30 blur-3xl" />
-        <div className="absolute -right-20 top-8 h-72 w-72 rounded-full bg-cyan-200/25 blur-3xl" />
-        <div className="relative mx-auto grid w-full max-w-7xl gap-10 px-6 py-16 lg:grid-cols-2 lg:items-center lg:py-24">
-          <div>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-sm font-medium text-brand-700">
-              <Sparkles className="h-4 w-4" />
-              AI-powered publishing
+      <main>
+        <section className="gh-page pt-10 lg:pt-16">
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(340px,0.8fr)] lg:items-end">
+            <div>
+              <p className="gh-kicker">Sell packaged expertise with range, not a niche lock-in</p>
+              <h1 className="max-w-5xl">
+                Guides, programs, and playbooks that feel designed to be bought.
+              </h1>
+              <p className="mt-6 max-w-2xl text-lg leading-8" style={{ color: 'var(--gh-muted)' }}>
+                GuideHub gives creators one place to package expertise into premium digital products.
+                Travel bloggers can sell city guides, trainers can sell structured programs, and specialists can
+                publish tactical playbooks without forcing everything into the same template.
+              </p>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link to="/register" className="btn-primary">
+                  Create your first guide
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link to="/catalog" className="btn-secondary">
+                  Explore the catalog
+                </Link>
+              </div>
+
+              <div className="mt-10 flex flex-wrap gap-3">
+                {['Travel guides', 'Workout programs', 'Creator playbooks', 'Paid checklists'].map((item) => (
+                  <span key={item} className="gh-pill">
+                    {item}
+                  </span>
+                ))}
+              </div>
             </div>
-            <h1 className="max-w-2xl text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">
-              Turn any draft into a
-              <span className="bg-gradient-to-r from-brand-600 to-cyan-500 bg-clip-text text-transparent"> paid guide </span>
-              in 5 minutes
-            </h1>
-            <p className="mt-5 max-w-xl text-lg text-neutral-600">
-              Paste text, polish with AI, set a price, and share one link. Built for creators who sell knowledge, not
-              software.
+
+            <div className="gh-surface-featured p-4 sm:p-5">
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <p className="gh-kicker">Cover-first marketplace</p>
+                  <p className="text-sm" style={{ color: 'var(--gh-muted)' }}>
+                    Each product carries its own visual character.
+                  </p>
+                </div>
+                <span className="gh-pill">GuideHub</span>
+              </div>
+
+              <div className="grid gap-4">
+                {showcaseCards.map((card) => (
+                  <article key={card.title} className="gh-product-card" style={{ ['--gh-skin-soft' as string]: card.soft }}>
+                    <div className="gh-product-cover aspect-[5/3] p-5">
+                      <span className="gh-cover-label">{card.label}</span>
+                      <div className="mt-16 max-w-[16rem]">
+                        <p className="gh-kicker" style={{ color: card.accent }}>{card.meta}</p>
+                        <h3 className="mt-2 text-3xl">{card.title}</h3>
+                        <p className="mt-3 text-sm leading-6" style={{ color: 'var(--gh-muted)' }}>
+                          {card.note}
+                        </p>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="border-y" style={{ borderColor: 'var(--gh-line)' }}>
+          <div className="gh-page py-12">
+            <div className="mb-10 max-w-2xl">
+              <p className="gh-kicker">One platform, multiple product languages</p>
+              <h2 className="mt-3">Built for mixed expertise, not one creator archetype.</h2>
+              <p className="gh-section-copy mt-4">
+                The platform stays consistent and trustworthy. The product page adapts its rhythm to the format:
+                journey, protocol, or playbook.
+              </p>
+            </div>
+
+            <div className="grid gap-5 lg:grid-cols-3">
+              {formatCards.map(({ icon: Icon, title, description }) => (
+                <article key={title} className="gh-surface p-6">
+                  <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-[16px] bg-white/75 text-brand-600 shadow-sm">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-[2rem]">{title}</h3>
+                  <p className="mt-4 text-sm leading-7" style={{ color: 'var(--gh-muted)' }}>
+                    {description}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="gh-page py-12">
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
+            <div className="gh-surface p-6 sm:p-8">
+              <p className="gh-kicker">Why creators stay</p>
+              <h2 className="mt-3 max-w-3xl">The platform feels premium before you even click the buy button.</h2>
+              <div className="mt-8 grid gap-4 sm:grid-cols-3">
+                {[
+                  ['Cover-first storefront', 'Products feel like designed editions, not uploaded files.'],
+                  ['Flexible formats', 'You can sell a guide, a program, or a playbook without changing tools.'],
+                  ['Single publishing flow', 'Draft, price, preview, and publish from the same studio.'],
+                ].map(([title, copy]) => (
+                  <div key={title} className="gh-surface-muted p-4">
+                    <p className="gh-kicker">0{title.charCodeAt(0) % 9}</p>
+                    <p className="mt-3 text-base font-semibold" style={{ color: 'var(--gh-ink)' }}>
+                      {title}
+                    </p>
+                    <p className="mt-2 text-sm leading-6" style={{ color: 'var(--gh-muted)' }}>
+                      {copy}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="gh-surface-featured p-6 sm:p-8">
+              <p className="gh-kicker">What publishing looks like</p>
+              <div className="mt-5 space-y-4">
+                {[
+                  'Paste existing notes or generate a first draft with AI.',
+                  'Choose a visual direction that matches the product format.',
+                  'Set price, preview rules, and publish a page that looks made to sell.',
+                ].map((item) => (
+                  <div key={item} className="flex items-start gap-3 rounded-[20px] bg-white/70 px-4 py-4">
+                    <CheckCircle2 className="mt-0.5 h-5 w-5 text-brand-600" />
+                    <p className="text-sm leading-7" style={{ color: 'var(--gh-text)' }}>{item}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-8 rounded-[24px] border px-4 py-5" style={{ borderColor: 'rgba(23, 19, 16, 0.08)', background: 'rgba(23, 19, 16, 0.04)' }}>
+                <div className="flex items-center gap-3">
+                  <Sparkles className="h-5 w-5 text-brand-600" />
+                  <p className="text-sm font-semibold" style={{ color: 'var(--gh-ink)' }}>
+                    Creator tools stay structured. Public pages stay expressive.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="gh-page pt-0">
+          <div className="gh-surface-featured p-6 text-center sm:p-10">
+            <p className="gh-kicker">Start with GuideHub</p>
+            <h2 className="mt-3">Turn what you know into a product people want to keep.</h2>
+            <p className="mx-auto mt-4 max-w-2xl text-base leading-8" style={{ color: 'var(--gh-muted)' }}>
+              Publish your first guide now, then expand into programs or playbooks when your catalog grows.
             </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Link
-                to="/register"
-                className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-200 transition hover:bg-brand-700"
-              >
-                Create your first guide - free
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                to="/guide/demo/istanbul-guide"
-                className="inline-flex items-center rounded-xl border border-neutral-300 bg-white px-6 py-3 text-sm font-semibold text-neutral-700 transition hover:border-neutral-400 hover:bg-neutral-50"
-              >
-                See example page
-              </Link>
-            </div>
-            <div className="mt-7 flex flex-wrap gap-6 text-sm text-neutral-500">
-              <span>Local payments</span>
-              <span>Auto delivery</span>
-              <span>AI packaging</span>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <Link to="/register" className="btn-primary">Open your studio</Link>
+              <Link to="/guide/demo/istanbul-3-days" className="btn-secondary">See a live example</Link>
             </div>
           </div>
-
-          <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-xl shadow-neutral-300/30">
-            <div className="rounded-xl bg-gradient-to-br from-brand-500 to-cyan-500 p-6 text-white">
-              <p className="text-xs uppercase tracking-wide text-white/80">Guide Preview</p>
-              <h3 className="mt-2 text-2xl font-bold">Istanbul in 3 Days</h3>
-              <p className="mt-2 text-sm text-white/90">Food spots, routes, transport hacks, and budget tips.</p>
-            </div>
-            <div className="space-y-3 p-4">
-              <div className="h-3 w-4/5 rounded bg-neutral-200" />
-              <div className="h-3 w-3/5 rounded bg-neutral-200" />
-              <div className="h-3 w-5/6 rounded bg-neutral-200" />
-              <div className="mt-6 flex items-center justify-between rounded-xl border border-neutral-200 p-4">
-                <span className="text-2xl font-bold">490 RUB</span>
-                <button className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-semibold text-white">Buy guide</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto w-full max-w-7xl px-6 py-16">
-        <div className="mb-10 text-center">
-          <h2 className="text-3xl font-bold">How it works</h2>
-          <p className="mt-2 text-neutral-600">From draft to sales in three steps</p>
-        </div>
-        <div className="grid gap-5 md:grid-cols-3">
-          {[
-            { icon: FileText, title: 'Paste text', desc: 'Import draft from notes, Telegram, or Google Docs.' },
-            { icon: CreditCard, title: 'Set price', desc: 'Choose template, cover, and pricing in one screen.' },
-            { icon: Share2, title: 'Publish link', desc: 'Share in Telegram and get paid instantly.' },
-          ].map(({ icon: Icon, title, desc }, index) => (
-            <article key={title} className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-              <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
-                <Icon className="h-5 w-5" />
-              </div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-brand-600">Step {index + 1}</p>
-              <h3 className="text-xl font-semibold">{title}</h3>
-              <p className="mt-2 text-neutral-600">{desc}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="border-y border-neutral-200 bg-white">
-        <div className="mx-auto grid w-full max-w-7xl gap-5 px-6 py-16 md:grid-cols-2">
-          {[
-            { icon: Users, title: 'Creators and bloggers', desc: 'Sell mini-guides, checklists, and niche bundles.' },
-            { icon: TrendingUp, title: 'Experts and consultants', desc: 'Package your frameworks into paid digital products.' },
-            { icon: BookOpen, title: 'Coaches and educators', desc: 'Launch mini-courses without complex LMS tools.' },
-            { icon: Sparkles, title: 'Teams and studios', desc: 'Create premium playbooks and internal paid resources.' },
-          ].map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="flex gap-4 rounded-2xl border border-neutral-200 p-5">
-              <div className="mt-1 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-neutral-100">
-                <Icon className="h-5 w-5 text-neutral-700" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold">{title}</h3>
-                <p className="mt-1 text-neutral-600">{desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto w-full max-w-7xl px-6 py-16">
-        <div className="mb-10 text-center">
-          <h2 className="text-3xl font-bold">Simple pricing</h2>
-          <p className="mt-2 text-neutral-600">Start free. Upgrade when sales grow.</p>
-        </div>
-        <div className="mx-auto grid max-w-4xl gap-5 md:grid-cols-2">
-          <article className="rounded-2xl border border-neutral-200 bg-white p-7">
-            <h3 className="text-xl font-semibold">Free</h3>
-            <p className="mt-3 text-4xl font-extrabold">0 RUB</p>
-            <p className="mt-1 text-sm text-neutral-500">5% commission per sale</p>
-            <ul className="mt-5 space-y-2 text-sm text-neutral-700">
-              {['1 active product', 'Basic analytics', 'Local payment support'].map((item) => (
-                <li key={item} className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-brand-600" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-            <Link to="/register" className="mt-6 inline-flex w-full items-center justify-center rounded-lg border border-neutral-300 px-4 py-2.5 text-sm font-semibold">
-              Start free
-            </Link>
-          </article>
-
-          <article className="relative rounded-2xl bg-neutral-900 p-7 text-white shadow-xl">
-            <span className="absolute right-5 top-4 rounded-full bg-brand-500 px-2.5 py-1 text-xs font-semibold">Recommended</span>
-            <h3 className="text-xl font-semibold">Pro</h3>
-            <p className="mt-3 text-4xl font-extrabold">790 RUB</p>
-            <p className="mt-1 text-sm text-neutral-300">2% commission per sale</p>
-            <ul className="mt-5 space-y-2 text-sm text-neutral-200">
-              {['Unlimited products', 'AI cover generation', 'Custom domain', 'Anti-piracy tools'].map((item) => (
-                <li key={item} className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-brand-300" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-            <Link
-              to="/register"
-              className="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-neutral-900"
-            >
-              Upgrade to Pro
-            </Link>
-          </article>
-        </div>
-      </section>
-
-      <footer className="border-t border-neutral-200 bg-white">
-        <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-4 px-6 py-8 md:flex-row">
-          <div className="flex items-center gap-2 text-neutral-800">
-            <BookOpen className="h-5 w-5 text-brand-600" />
-            <span className="font-semibold">GuideHub</span>
-          </div>
-          <div className="text-sm text-neutral-500">© 2026 GuideHub</div>
-        </div>
-      </footer>
+        </section>
+      </main>
     </div>
   )
 }

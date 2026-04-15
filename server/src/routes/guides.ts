@@ -117,11 +117,24 @@ function buildLockedSectionContent(): Record<string, unknown> {
 router.get("/", authMiddleware, async (req: Request, res) => {
   try {
     const userId = req.user!.id;
-    const guides = await prisma.guide.findMany({
-      where: { authorId: userId },
-      orderBy: { createdAt: "desc" },
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 50));
+    const skip = (page - 1) * limit;
+
+    const [guides, total] = await Promise.all([
+      prisma.guide.findMany({
+        where: { authorId: userId },
+        orderBy: { updatedAt: "desc" },
+        skip,
+        take: limit,
+      }),
+      prisma.guide.count({ where: { authorId: userId } }),
+    ]);
+
+    res.json({
+      guides,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     });
-    res.json(guides);
   } catch (err) {
     console.error("[GET /guides]", err);
     res.status(500).json({ error: "Failed to fetch guides" });

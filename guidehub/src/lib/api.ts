@@ -1,6 +1,6 @@
 import type { Guide, GuideSection } from '@/types'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API_URL = import.meta.env.VITE_API_URL || '/api'
 
 type AnyRecord = Record<string, unknown>
 
@@ -238,7 +238,8 @@ export const guidesApi = {
   getPublic: async (username: string, slug: string) => {
     const guide = await request<AnyRecord>(`/guides/${username}/${slug}/public`)
     return normalizePublicGuide(guide)
-  },  getCatalog: async (params: { q?: string; sort?: string; page?: number; limit?: number } = {}) => {
+  },
+  getCatalog: async (params: { q?: string; sort?: string; page?: number; limit?: number } = {}) => {
     const qs = new URLSearchParams()
     if (params.q) qs.set('q', params.q)
     if (params.sort) qs.set('sort', params.sort)
@@ -253,6 +254,8 @@ export const guidesApi = {
         description: toString(g.description),
         coverImage: (g.coverImage ?? g.cover_image) as string | null,
         accentColor: toString(g.accentColor ?? g.accent_color, '#6366f1'),
+        template: toString(g.template, 'minimal'),
+        isCourse: Boolean(g.isCourse ?? g.is_course ?? false),
         price: toNumber(g.price),
         sales: toNumber(g.sales),
         publishedAt: toString(g.publishedAt ?? g.published_at),
@@ -282,6 +285,8 @@ export const guidesApi = {
         description: toString(g.description),
         coverImage: (g.coverImage ?? g.cover_image) as string | null,
         accentColor: toString(g.accentColor ?? g.accent_color, '#6366f1'),
+        template: toString(g.template, 'minimal'),
+        isCourse: Boolean(g.isCourse ?? g.is_course ?? false),
         price: toNumber(g.price),
         sales: toNumber(g.sales),
         publishedAt: toString(g.publishedAt ?? g.published_at),

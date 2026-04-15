@@ -1,8 +1,9 @@
-﻿import "dotenv/config";
+import "dotenv/config";
 import { pinoHttp } from "pino-http";
 import { logger } from "./logger.js";
 import express from "express";
 import cors from "cors";
+import rateLimit from "express-rate-limit";
 import { prisma } from "./db/prisma.js";
 
 // Routes
@@ -52,7 +53,16 @@ app.get("/health", async (_req, res) => {
   }
 });
 
-// Routes
+// Rate limiting on auth routes
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // 20 requests per window
+  message: { error: "Too many requests, please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use("/auth", authLimiter);
 app.use("/auth", authRoutes);
 app.use("/ai", aiRoutes);
 app.use("/guides", guidesRoutes);
@@ -82,5 +92,15 @@ app.use((_req, res) => {
 app.listen(PORT, () => {
   logger.info({ port: PORT, env: process.env.NODE_ENV }, "GuideHub backend started");
 });
+
+// Graceful shutdown
+const shutdown = async (signal: string) => {
+  logger.info({ signal }, "Shutting down gracefully");
+  await prisma.$disconnect();
+  process.exit(0);
+};
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
 
 export default app;

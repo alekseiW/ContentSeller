@@ -20,6 +20,7 @@ interface AuthState {
   signOut: () => void
   updateProfile: (updates: Partial<{ full_name: string; bio: string; avatar_url: string }>) => Promise<void>
   fetchMe: () => Promise<void>
+  init: () => Promise<void>
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -128,12 +129,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ loading: false, initialized: true, user: null, profile: null })
     }
   },
-}))
 
-// Initialize on module load — fetch current user if token exists, or mark as initialized
-const existingToken = getToken()
-if (existingToken) {
-  useAuthStore.getState().fetchMe()
-} else {
-  useAuthStore.setState({ initialized: true })
-}
+  init: async () => {
+    const token = getToken()
+    if (!token) {
+      set({ initialized: true })
+      return
+    }
+    await get().fetchMe()
+  },
+}))

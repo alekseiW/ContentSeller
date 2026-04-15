@@ -1,6 +1,7 @@
-﻿import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react'
+import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react'
 import type { ChangeEvent } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { createPortal } from 'react-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useEditor, EditorContent } from '@tiptap/react'
 import { BubbleMenu } from '@tiptap/react/menus'
 import StarterKit from '@tiptap/starter-kit'
@@ -121,9 +122,10 @@ interface SlashMenuProps {
   onIndexChange: (idx: number) => void
   onSelect: (cmd: (typeof SLASH_COMMANDS)[number]) => void
   position: { top: number; left: number }
+  menuRef: React.RefObject<HTMLDivElement | null>
 }
 
-function SlashMenu({ commands, query, activeIndex, onIndexChange, onSelect, position }: SlashMenuProps) {
+function SlashMenu({ commands, query, activeIndex, onIndexChange, onSelect, position, menuRef }: SlashMenuProps) {
   const filtered = useMemo(
     () =>
       commands.filter(
@@ -140,17 +142,19 @@ function SlashMenu({ commands, query, activeIndex, onIndexChange, onSelect, posi
     }
   }, [filtered.length, activeIndex, onIndexChange])
 
-  if (filtered.length === 0) return null
+  if (filtered.length === 0 || typeof document === 'undefined') return null
 
-  return (
+  return createPortal(
     <div
+      ref={menuRef}
       className="gh-slash-menu"
       style={{
-        position: 'absolute',
+        position: 'fixed',
         top: position.top,
         left: position.left,
-        zIndex: 50,
+        zIndex: 120,
       }}
+      onMouseDown={(e) => e.preventDefault()}
     >
       {filtered.map((cmd, idx) => {
         const Icon = cmd.icon
@@ -167,32 +171,76 @@ function SlashMenu({ commands, query, activeIndex, onIndexChange, onSelect, posi
           </button>
         )
       })}
-    </div>
+    </div>,
+    document.body,
   )
 }
 
 // ─── BlockInsertHandle ───────────────────────────────────────────────────────
 
 interface BlockInsertHandleProps {
-  onInsert: (pos: number) => void
+  onSelect: (cmd: (typeof SLASH_COMMANDS)[number]) => void
+  position: { top: number; left: number } | null
 }
 
-function BlockInsertHandle({ onInsert }: BlockInsertHandleProps) {
+function BlockInsertHandle({ onSelect, position }: BlockInsertHandleProps) {
   const [open, setOpen] = useState(false)
-  const handleRef = useRef<HTMLButtonElement>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
 
-  return (
-    <div className="gh-block-insert-handle">
+  useEffect(() => {
+    if (!open) return
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node | null
+      if (target && rootRef.current?.contains(target)) {
+        return
+      }
+
+      setOpen(false)
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setOpen(false)
+      }
+    }
+
+    window.addEventListener('pointerdown', handlePointerDown, true)
+    window.addEventListener('keydown', handleEscape)
+
+    return () => {
+      window.removeEventListener('pointerdown', handlePointerDown, true)
+      window.removeEventListener('keydown', handleEscape)
+    }
+  }, [open])
+
+  useEffect(() => {
+    if (!position) {
+      setOpen(false)
+    }
+  }, [position])
+
+  if (!position || typeof document === 'undefined') {
+    return null
+  }
+
+  return createPortal(
+    <div ref={rootRef} className="gh-block-insert-handle">
       <button
-        ref={handleRef}
         className="gh-block-insert-btn"
         onClick={() => setOpen(!open)}
+        onMouseDown={(e) => e.preventDefault()}
         title="Insert block"
+        style={{ position: 'fixed', top: position.top, left: position.left }}
       >
         <Plus size={14} />
       </button>
       {open && (
-        <div className="gh-block-insert-menu">
+        <div
+          className="gh-block-insert-menu"
+          onMouseDown={(e) => e.preventDefault()}
+          style={{ position: 'fixed', top: position.top + 36, left: position.left }}
+        >
           {SLASH_COMMANDS.map((cmd) => {
             const Icon = cmd.icon
             return (
@@ -200,7 +248,7 @@ function BlockInsertHandle({ onInsert }: BlockInsertHandleProps) {
                 key={cmd.id}
                 className="gh-block-insert-menu-item"
                 onClick={() => {
-                  onInsert(0)
+                  onSelect(cmd)
                   setOpen(false)
                 }}
               >
@@ -211,7 +259,8 @@ function BlockInsertHandle({ onInsert }: BlockInsertHandleProps) {
           })}
         </div>
       )}
-    </div>
+    </div>,
+    document.body,
   )
 }
 
@@ -219,16 +268,30 @@ function BlockInsertHandle({ onInsert }: BlockInsertHandleProps) {
 
 interface BubbleMenuComponentProps {
   editor: ReturnType<typeof useEditor>
+  scrollTarget?: HTMLElement | Window | null
   onAiEdit: () => void
   onTogglePaid: () => void
   onSetLink: () => void
 }
 
-function BubbleMenuComponent({ editor, onAiEdit, onTogglePaid, onSetLink }: BubbleMenuComponentProps) {
+function BubbleMenuComponent({ editor, scrollTarget, onAiEdit, onTogglePaid, onSetLink }: BubbleMenuComponentProps) {
   if (!editor) return null
 
   return (
-    <BubbleMenu editor={editor} shouldShow={({ editor }) => !editor.state.selection.empty}>
+    <BubbleMenu
+      editor={editor}
+      className="gh-bubble-menu-host"
+      appendTo={() => document.body}
+      options={{
+        strategy: 'fixed',
+        placement: 'top',
+        offset: 10,
+        flip: { padding: 12 },
+        shift: { padding: 12 },
+        scrollTarget: scrollTarget ?? window,
+      }}
+      shouldShow={({ editor }) => !editor.state.selection.empty}
+    >
       <div className="gh-bubble-menu">
         <button
           className={`gh-bubble-btn ${editor.isActive('bold') ? 'active' : ''}`}
@@ -339,7 +402,6 @@ function Toggle({ checked, onChange, label }: ToggleProps) {
 
 export default function EditorPage() {
   const { guideId } = useParams<{ guideId: string }>()
-  const navigate = useNavigate()
 
   const { currentGuide, sections, loading, fetchGuide, updateGuide, publishGuide } = useGuideStore()
   const { profile } = useAuthStore()
@@ -375,16 +437,40 @@ export default function EditorPage() {
 
   const [mediaUploading, setMediaUploading] = useState(false)
   const [isDraggingFile, setIsDraggingFile] = useState(false)
-  const [showBlockInsert, setShowBlockInsert] = useState(false)
-  const [blockInsertPos, setBlockInsertPos] = useState<number>(0)
 
   // ── Refs ─────────────────────────────────────────────────────────────────
-  const editorRef = useRef<HTMLDivElement>(null)
+  const editorCanvasRef = useRef<HTMLDivElement>(null)
+  const slashMenuRef = useRef<HTMLDivElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isHydratingRef = useRef(false)
   const lastHydratedSignatureRef = useRef<string | null>(null)
   const lastSavedHtmlRef = useRef<string | null>(null)
+  const [menuViewportTick, setMenuViewportTick] = useState(0)
+
+  const openSidebar = useCallback(() => {
+    setSidebarOpen(true)
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      setRightPanelOpen(false)
+    }
+  }, [])
+
+  const openRightPanel = useCallback(() => {
+    setRightPanelOpen(true)
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      setSidebarOpen(false)
+    }
+  }, [])
+
+  const closeSidebar = useCallback(() => setSidebarOpen(false), [])
+  const closeRightPanel = useCallback(() => setRightPanelOpen(false), [])
+
+  const closeSlashMenu = useCallback(() => {
+    setShowSlash(false)
+    setSlashPos(null)
+    setSlashQuery('')
+    setSlashActiveIdx(0)
+  }, [])
 
   // ── Fetch guide on mount ─────────────────────────────────────────────────
   useEffect(() => {
@@ -426,8 +512,7 @@ export default function EditorPage() {
         setShowSlash(true)
         setSlashActiveIdx(0)
       } else {
-        setShowSlash(false)
-        setSlashPos(null)
+        closeSlashMenu()
       }
 
       // Auto-save with debounce
@@ -451,7 +536,13 @@ export default function EditorPage() {
         setSlashQuery(match[1])
         setSlashPos(editor.state.selection.from)
         setShowSlash(true)
+        setSlashActiveIdx(0)
+      } else {
+        closeSlashMenu()
       }
+    },
+    onBlur: () => {
+      closeSlashMenu()
     },
   })
 
@@ -508,14 +599,30 @@ export default function EditorPage() {
           handleSlashCommand(filtered[slashActiveIdx])
         }
       } else if (e.key === 'Escape') {
-        setShowSlash(false)
-        setSlashPos(null)
+        closeSlashMenu()
       }
     }
 
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [showSlash, slashQuery, slashActiveIdx])
+  }, [showSlash, slashQuery, slashActiveIdx, closeSlashMenu])
+
+  useEffect(() => {
+    if (!showSlash) return
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node | null
+
+      if (target && slashMenuRef.current?.contains(target)) {
+        return
+      }
+
+      closeSlashMenu()
+    }
+
+    window.addEventListener('pointerdown', handlePointerDown, true)
+    return () => window.removeEventListener('pointerdown', handlePointerDown, true)
+  }, [showSlash, closeSlashMenu])
 
   // ── Cleanup save timer on unmount ────────────────────────────────────────
   useEffect(() => {
@@ -523,6 +630,35 @@ export default function EditorPage() {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
     }
   }, [])
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setSidebarOpen(true)
+      }
+      if (window.innerWidth >= 1024) {
+        setRightPanelOpen(true)
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const isMobileDrawerOpen = (sidebarOpen && window.innerWidth < 768) || (rightPanelOpen && window.innerWidth < 1024)
+    const previousOverflow = document.body.style.overflow
+
+    if (isMobileDrawerOpen) {
+      document.body.style.overflow = 'hidden'
+    }
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [sidebarOpen, rightPanelOpen])
 
   // ── Handlers ─────────────────────────────────────────────────────────────
 
@@ -622,13 +758,16 @@ export default function EditorPage() {
     }
   }, [editor, aiGeneratePrompt])
 
-  const handleSlashCommand = useCallback(
-    (cmd: (typeof SLASH_COMMANDS)[number]) => {
-      if (!editor || slashPos === null) return
+  const executeEditorCommand = useCallback(
+    (cmd: (typeof SLASH_COMMANDS)[number], removeSlashTrigger = false) => {
+      if (!editor) return
 
-      // Remove the slash trigger text
-      const from = slashPos - slashQuery.length - 1
-      editor.chain().focus().deleteRange({ from, to: slashPos }).run()
+      if (removeSlashTrigger && slashPos !== null) {
+        const from = slashPos - slashQuery.length - 1
+        editor.chain().focus().deleteRange({ from, to: slashPos }).run()
+      } else {
+        editor.chain().focus().run()
+      }
 
       switch (cmd.id) {
         case 'h1':
@@ -676,13 +815,43 @@ export default function EditorPage() {
           editor.chain().focus().setCallout('info').run()
           break
       }
-
-      setShowSlash(false)
-      setSlashPos(null)
-      setSlashQuery('')
     },
     [editor, slashPos, slashQuery, openImagePicker, insertVideoByUrl],
   )
+
+  const handleSlashCommand = useCallback(
+    (cmd: (typeof SLASH_COMMANDS)[number]) => {
+      if (!editor || slashPos === null) return
+      executeEditorCommand(cmd, true)
+      closeSlashMenu()
+    },
+    [editor, slashPos, executeEditorCommand, closeSlashMenu],
+  )
+
+  const handleBlockInsertCommand = useCallback(
+    (cmd: (typeof SLASH_COMMANDS)[number]) => {
+      executeEditorCommand(cmd)
+    },
+    [executeEditorCommand],
+  )
+
+  useEffect(() => {
+    const notifyViewportChange = () => {
+      setMenuViewportTick((value) => value + 1)
+    }
+
+    const canvas = editorCanvasRef.current
+
+    window.addEventListener('resize', notifyViewportChange)
+    window.addEventListener('scroll', notifyViewportChange, true)
+    canvas?.addEventListener('scroll', notifyViewportChange, { passive: true })
+
+    return () => {
+      window.removeEventListener('resize', notifyViewportChange)
+      window.removeEventListener('scroll', notifyViewportChange, true)
+      canvas?.removeEventListener('scroll', notifyViewportChange)
+    }
+  }, [])
 
   const handleSave = useCallback(async () => {
     if (!editor || !guideId || !currentGuide) return
@@ -807,15 +976,53 @@ export default function EditorPage() {
 
   // ── Slash menu position ──────────────────────────────────────────────────
   const slashMenuPosition = useMemo(() => {
-    if (!showSlash || !editorRef.current || slashPos === null) {
+    if (!showSlash || !editor || slashPos === null || typeof window === 'undefined') {
       return { top: 0, left: 0 }
     }
-    const rect = editorRef.current.getBoundingClientRect()
-    return {
-      top: rect.top + 100,
-      left: rect.left + 20,
+
+    try {
+      const coords = editor.view.coordsAtPos(slashPos)
+      const menuWidth = window.innerWidth >= 640 ? 256 : 224
+      const menuHeight = 320
+      const padding = 12
+      const preferredTop = coords.bottom + 8
+      const hasRoomBelow = preferredTop + menuHeight <= window.innerHeight - padding
+
+      return {
+        top: hasRoomBelow ? preferredTop : Math.max(padding, coords.top - menuHeight - 8),
+        left: Math.max(padding, Math.min(coords.left, window.innerWidth - menuWidth - padding)),
+      }
+    } catch {
+      return { top: 0, left: 0 }
     }
-  }, [showSlash, slashPos])
+  }, [showSlash, slashPos, editor, menuViewportTick])
+
+  const blockInsertPosition = useMemo(() => {
+    if (!editor || typeof window === 'undefined') {
+      return null
+    }
+
+    try {
+      const selectionPos = editor.state.selection.from
+      const coords = editor.view.coordsAtPos(selectionPos)
+      const canvasRect = editorCanvasRef.current?.getBoundingClientRect()
+      const contentLeft = canvasRect ? canvasRect.left + Math.max((canvasRect.width - 720) / 2, 0) : coords.left
+      const mobile = window.innerWidth < 640
+
+      if (canvasRect && (coords.top < canvasRect.top - 8 || coords.top > canvasRect.bottom + 8)) {
+        return null
+      }
+
+      return {
+        top: Math.max(88, coords.top - 3),
+        left: mobile
+          ? Math.max(8, Math.min(window.innerWidth - 42, coords.left - 8))
+          : Math.max(8, contentLeft - 42),
+      }
+    } catch {
+      return null
+    }
+  }, [editor, editor?.state.selection.from, menuViewportTick])
 
   // ── Accent color ─────────────────────────────────────────────────────────
   const selectedAccent = useMemo(
@@ -930,7 +1137,7 @@ export default function EditorPage() {
         {sidebarOpen && (
           <div
             className="gh-mobile-backdrop md:hidden"
-            onClick={() => setSidebarOpen(false)}
+            onClick={closeSidebar}
           />
         )}
         <aside
@@ -944,7 +1151,7 @@ export default function EditorPage() {
               <h3>Outline</h3>
               <button
                 className="gh-sidebar-toggle"
-                onClick={() => setSidebarOpen(false)}
+                onClick={closeSidebar}
               >
                 <ChevronLeft size={16} />
               </button>
@@ -961,6 +1168,9 @@ export default function EditorPage() {
                     if (editor) {
                       editor.commands.focus(item.pos)
                     }
+                    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+                      closeSidebar()
+                    }
                   }}
                 >
                   <ChevronRight size={12} />
@@ -971,16 +1181,16 @@ export default function EditorPage() {
           </aside>
 
         {/* ── Main Editor Area ────────────────────────────────────────── */}
-        <main className="gh-editor-main" ref={editorRef}>
+        <main className="gh-editor-main">
           {/* Toolbar */}
           <div className="gh-editor-toolbar">
             {!sidebarOpen && (
-              <button
-                className="gh-toolbar-btn"
-                onClick={() => setSidebarOpen(true)}
-                title="Show outline"
-              >
-                <ChevronRight size={16} />
+                <button
+                  className="gh-toolbar-btn"
+                  onClick={openSidebar}
+                  title="Show outline"
+                >
+                  <ChevronRight size={16} />
               </button>
             )}
             <ToolbarBtn
@@ -1109,12 +1319,12 @@ export default function EditorPage() {
               <Sparkles size={16} />
             </button>
             {!rightPanelOpen && (
-              <button
-                className="gh-toolbar-btn"
-                onClick={() => setRightPanelOpen(true)}
-                title="Settings"
-              >
-                <ChevronLeft size={16} />
+                <button
+                  className="gh-toolbar-btn"
+                  onClick={openRightPanel}
+                  title="Settings"
+                >
+                  <ChevronLeft size={16} />
               </button>
             )}
           </div>
@@ -1181,6 +1391,7 @@ export default function EditorPage() {
           {/* Editor Canvas */}
           <div
             className="gh-editor-canvas"
+            ref={editorCanvasRef}
             onDragOver={handleEditorDragOver}
             onDragLeave={handleEditorDragLeave}
             onDrop={handleEditorDrop}
@@ -1201,10 +1412,8 @@ export default function EditorPage() {
             )}
             <EditorContent editor={editor} />
             <BlockInsertHandle
-              onInsert={(pos) => {
-                setBlockInsertPos(pos)
-                setShowBlockInsert(true)
-              }}
+              onSelect={handleBlockInsertCommand}
+              position={blockInsertPosition}
             />
           </div>
         </main>
@@ -1214,7 +1423,7 @@ export default function EditorPage() {
         {rightPanelOpen && (
           <div
             className="gh-mobile-backdrop lg:hidden"
-            onClick={() => setRightPanelOpen(false)}
+            onClick={closeRightPanel}
           />
         )}
         <aside
@@ -1228,7 +1437,7 @@ export default function EditorPage() {
               <h3>Settings</h3>
               <button
                 className="gh-right-panel-close"
-                onClick={() => setRightPanelOpen(false)}
+                onClick={closeRightPanel}
               >
                 <ChevronRight size={16} />
               </button>
@@ -1331,20 +1540,14 @@ export default function EditorPage() {
           onIndexChange={setSlashActiveIdx}
           onSelect={handleSlashCommand}
           position={slashMenuPosition}
+          menuRef={slashMenuRef}
         />
       )}
-
-      {/* ── Block Insert Handle ─────────────────────────────────────────── */}
-      {showBlockInsert && (
-        <BlockInsertHandle
-          onInsert={() => setShowBlockInsert(false)}
-        />
-      )}
-
       {/* ── Bubble Menu ─────────────────────────────────────────────────── */}
       {editor && (
         <BubbleMenuComponent
           editor={editor}
+          scrollTarget={editorCanvasRef.current}
           onAiEdit={() => {
             setShowAi(true)
           }}

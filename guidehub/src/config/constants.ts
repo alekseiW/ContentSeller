@@ -1,7 +1,5 @@
 export const APP_NAME = 'GuideHub'
 export const APP_URL = import.meta.env.VITE_APP_URL || 'http://localhost:5173'
-export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
-export const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 export const AI_PROVIDERS = ['openai', 'anthropic', 'gemini', 'grok'] as const
 export type AIProvider = typeof AI_PROVIDERS[number]
