@@ -48,7 +48,7 @@ async function getGigaChatToken(): Promise<string> {
 
   const data = (await res.json()) as { access_token: string; expires_at: number };
   gigachatToken = data.access_token;
-  gigachatTokenExpiry = data.expires_at * 1000; // convert to ms
+  gigachatTokenExpiry = data.expires_at; // already in milliseconds
   return gigachatToken;
 }
 
