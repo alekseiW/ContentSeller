@@ -27,6 +27,7 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/guidehub?schema=public
       NODE_ENV: production
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
     depends_on:
       postgres:
         condition: service_healthy
