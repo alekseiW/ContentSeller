@@ -30,7 +30,7 @@ async function getGigaChatToken(): Promise<string> {
   }
 
   const uuid = crypto.randomUUID();
-  const res = await fetch("https://ngw.devices.sberbank.ru:443/api/v2/oauth", {
+  const res = await fetch("https://ngw.devices.sberbank.ru:9443/api/v2/oauth", {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
