@@ -119,11 +119,10 @@ async function callGigaChat(prompt: string, systemPrompt?: string): Promise<stri
   const messages: OpenAI.ChatCompletionMessageParam[] = [];
   if (systemPrompt) messages.push({ role: "system", content: systemPrompt });
   messages.push({ role: "user", content: prompt });
-  const res = await gigachat.chat.completions.create({
-    model: "GigaChat-Max",
-    messages,
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const res = await gigachat.chat.completions.create(
+    { model: "GigaChat-Max", messages },
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
   return res.choices[0]?.message?.content ?? "";
 }
 
