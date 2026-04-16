@@ -219,8 +219,13 @@ export const authApi = {
 
 export const guidesApi = {
   list: async () => {
-    const data = await request<AnyRecord[]>('/guides')
-    return data.map(normalizeGuide)
+    const data = await request<AnyRecord | AnyRecord[]>('/guides')
+    const guidesRaw = Array.isArray(data)
+      ? data
+      : Array.isArray(data.guides)
+        ? (data.guides as AnyRecord[])
+        : []
+    return guidesRaw.map(normalizeGuide)
   },
   create: async (data: unknown) => {
     const created = await request<AnyRecord>('/guides', { method: 'POST', body: JSON.stringify(data) })
